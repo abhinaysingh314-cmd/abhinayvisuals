@@ -1,0 +1,9 @@
+{
+  // VS Code will prompt to install these when you open the folder.
+  "recommendations": [
+    "ritwickdey.liveserver",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "yzhang.markdown-all-in-one"
+  ]
+}

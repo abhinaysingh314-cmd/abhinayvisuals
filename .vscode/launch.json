@@ -1,0 +1,14 @@
+{
+  // Run and Debug (F5): starts the local server, then opens the site in Chrome with the debugger attached.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Open site in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Start site"
+    }
+  ]
+}

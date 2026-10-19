@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+*.log
+# raw, un-encoded video renders (keep only the web-ready files in assets/video)
+assets/video/raw/
+# not needed on the live site
+export/
+media /
+.claude/
