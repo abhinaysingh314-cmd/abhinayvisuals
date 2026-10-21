@@ -11,15 +11,11 @@
   const W = n => ({ thumb: `assets/img/work/${n}.jpg`, video: `assets/video/work/${n}.mp4`, preview: `assets/video/work/${n}-preview.mp4` });
   const PROJECTS = [
     { title: 'Election Commission', type: 'Documentary', cat: 'documentary', ratio: '9:16', category: 'News explainer', year: '2026', ...W('documentary-election'),
-      desc: 'A documentary-style news explainer on fake voter addresses, edited in the vein of Dhruv Rathee and Nitish Rajput: archival stills, bold data cards, newspaper call-outs and a pace that never lets go.' },
+      desc: 'A documentary-style news explainer on fake voter addresses, built from archival stills, data cards and newspaper call-outs.' },
     { title: 'Night Ride, Prayagraj', type: 'Cinematic', cat: 'cinematic', ratio: '16:9', category: 'Short film', year: '2026', ...W('cinematic-night-ride'),
       desc: 'A 4K cinematic short shot at night in Prayagraj. Low-light grade, police-scanner captions and sound design that turns a motorbike ride into a chase.' },
-    { title: 'Podcast, Before & After', type: 'Before / After', cat: 'beforeafter', ratio: '16:9', category: 'Podcast', year: '2026', ...W('podcast-before-after'),
-      desc: 'A green-screen recording rebuilt as a documentary set: keyed background, motion graphics, B-roll and sound effects timed to every cut.' },
-    { title: 'Talking Head, Re-staged', type: 'Before / After', cat: 'beforeafter', ratio: '9:16', category: 'Reel', year: '2026', ...W('sample-before-after-1'),
-      desc: 'Raw phone footage next to the finished reel: cleaner framing, new backgrounds, a punchier cut and a timeline you can follow.' },
-    { title: 'Brand Explainer, Cleaned Up', type: 'Before / After', cat: 'beforeafter', ratio: '9:16', category: 'Reel', year: '2026', ...W('sample-before-after-2'),
-      desc: 'A brand explainer reel taken from a straight recording to a tight, captioned edit, shown side by side with its timeline.' },
+    { title: 'Kerala Holiday Poster', type: 'Design', cat: 'design', ratio: '4:5', category: 'Poster', year: '', thumb: 'assets/img/work-04.png', video: '', preview: '',
+      desc: 'A holiday poster for Hodophiles Xplore Visas: a four-night Kerala package with backwater photos, the price and contact details.' },
     { title: 'Australia PR, Explained', type: 'Reel', cat: 'reel', ratio: '9:16', category: 'Creator', year: '2026', ...W('reel-australia-pr'),
       desc: 'A personal-brand reel in Hinglish: word-by-word captions, cutaway B-roll and map graphics that keep an immigration topic easy to follow.' },
     { title: 'Under-14 Visa Interviews', type: 'AI Video', cat: 'ai', ratio: '9:16', category: 'Immigration', year: '2026', ...W('ai-visa-interview'),
@@ -115,7 +111,7 @@
   const grid = $('#workGrid');
 
   function renderWork() {
-    grid.innerHTML = PROJECTS.map((p, i) => `
+    grid.innerHTML = PROJECTS.map((p, i) => p.cat === 'ai' ? '' : `
       <a class="card" href="#work" data-i="${i}" data-cat="${p.cat}" data-cursor="play" aria-label="Open project: ${p.title}">
         <div class="card__media frame" style="aspect-ratio:${ratioCSS(p.ratio)}">
           <img src="${p.thumb}" alt="" loading="lazy" decoding="async">
@@ -124,7 +120,6 @@
         </div>
         <div class="card__info">
           <h3 class="card__title">${p.title}</h3>
-          <span class="card__meta mono">${p.category} · ${p.year}</span>
         </div>
       </a>`).join('');
 
@@ -194,25 +189,24 @@
      ========================================================= */
   function lightbox() {
     const lb = $('.lightbox'), media = $('.lightbox__media', lb);
-    let index = 0, lastFocus = null, open = false;
+    let index = 0, lastFocus = null, open = false, list = [];
 
     const fill = i => {
-      const list = visibleCards().map(c => +c.dataset.i);
       index = (i + list.length) % list.length;
       const p = PROJECTS[list[index]];
       media.innerHTML = p.video
         ? `<video src="${p.video}" controls autoplay playsinline poster="${p.thumb}"></video>`
         : `<img src="${p.thumb}" alt="${p.title}">`;
-      $('.lightbox__meta', lb).textContent = `${p.type} · ${p.ratio} · ${p.category} · ${p.year}`;
+      $('.lightbox__meta', lb).textContent = [p.type, p.ratio, p.category, p.year].filter(Boolean).join(' · ');
       $('.lightbox__title', lb).textContent = p.title;
       $('.lightbox__desc', lb).textContent = p.desc;
       $('.lightbox__count', lb).textContent = `${pad(index + 1)} / ${pad(list.length)}`;
       if (hasGSAP && !RM) gsap.fromTo([media, $('.lightbox__info', lb)], { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .7, stagger: .08, ease: 'expo.out' });
     };
 
-    const show = i => {
+    const show = (i, playlist) => {
       lastFocus = document.activeElement; open = true;
-      const list = visibleCards().map(c => +c.dataset.i);
+      list = playlist || visibleCards().map(c => +c.dataset.i);
       fill(list.indexOf(i));
       lb.setAttribute('aria-hidden', 'false');
       lenis && lenis.stop();
@@ -245,6 +239,7 @@
       const link = e.target.closest('[data-open-project]'); if (!link) return;
       e.preventDefault();
       const i = +link.dataset.openProject;
+      if (link.dataset.group) { show(i, PROJECTS.map((p, k) => p.cat === link.dataset.group ? k : -1).filter(k => k >= 0)); return; }
       if (!visibleCards().some(c => +c.dataset.i === i)) $('.filter[data-filter="all"]').click();
       show(i);
     });
@@ -330,6 +325,63 @@
     });
   }
 
+  /* ---------- Menu panels (About, AI videos): open on hover over their menu link, or on click/tap ---------- */
+  function navPanels() {
+    // the AI panel lists the AI projects from PROJECTS
+    const aiList = $('#ai-videos .ai-pop__grid');
+    if (aiList) aiList.innerHTML = PROJECTS.map((p, i) => p.cat !== 'ai' ? '' : `
+      <li><button class="ai-pop__item" type="button" data-open-project="${i}" data-group="ai" aria-label="Play ${p.title}">
+        <span class="ai-pop__thumb"><img src="${p.thumb}" alt="" loading="lazy"></span>
+        <span class="ai-pop__name">${p.title}</span>
+      </button></li>`).join('');
+
+    const panels = [['#about', '.nav__link--about'], ['#ai-videos', '.nav__link--ai']]
+      .map(([pop, trigger]) => ({ hash: pop, pop: $(pop), trigger: $(trigger), timer: 0 }))
+      .filter(x => x.pop);
+    const isOpen = x => x.pop.classList.contains('is-open');
+    const open = x => {
+      panels.forEach(o => { if (o !== x) close(o); });
+      clearTimeout(x.timer);
+      x.pop.classList.add('is-open'); x.pop.setAttribute('aria-hidden', 'false');
+      if (x.trigger) x.trigger.setAttribute('aria-expanded', 'true');
+      root.classList.add('nav-pop-open');
+    };
+    function close(x) {
+      clearTimeout(x.timer);
+      x.pop.classList.remove('is-open'); x.pop.setAttribute('aria-hidden', 'true');
+      if (x.trigger) x.trigger.setAttribute('aria-expanded', 'false');
+      if (!panels.some(o => o.pop.classList.contains('is-open'))) root.classList.remove('nav-pop-open');
+    }
+    const closeSoon = x => { clearTimeout(x.timer); x.timer = setTimeout(() => close(x), 220); };
+
+    panels.forEach(x => {
+      if (FINE && x.trigger) {
+        x.trigger.addEventListener('mouseenter', () => open(x));
+        x.trigger.addEventListener('mouseleave', () => closeSoon(x));
+        x.pop.addEventListener('mouseenter', () => open(x));
+        x.pop.addEventListener('mouseleave', () => closeSoon(x));
+      }
+      $('.nav-pop__close', x.pop).addEventListener('click', () => close(x));
+    });
+    document.addEventListener('click', e => {
+      const link = e.target.closest('a[href^="#"]');
+      const x = link && panels.find(o => o.hash === link.getAttribute('href'));
+      if (x) {
+        e.preventDefault(); e.stopPropagation();
+        const menu = $('#mobileMenu');
+        if (menu && menu.classList.contains('is-open')) $('.menu-btn').click();
+        isOpen(x) && !FINE ? close(x) : open(x);
+        return;
+      }
+      // a video picked inside a panel closes the panel; the player opens it
+      panels.forEach(o => { if (isOpen(o) && (!o.pop.contains(e.target) || e.target.closest('[data-open-project]'))) close(o); });
+    }, true);
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      panels.forEach(o => { if (isOpen(o)) { close(o); o.trigger && o.trigger.focus(); } });
+    });
+  }
+
   /* ---------- skill meters fill when they scroll into view ---------- */
   function meters() {
     const list = $('.meters'); if (!list) return;
@@ -380,6 +432,7 @@
   mobileMenu();
   demoPlayers();
   meters();
+  navPanels();
 
   if (!hasGSAP || RM) {
     root.classList.add('rm');
