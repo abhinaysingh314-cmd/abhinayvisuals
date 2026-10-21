@@ -23,6 +23,20 @@
   <link rel="preload" as="image" href="assets/img/site/abhinay-canon.webp" fetchpriority="high">
   <link rel="stylesheet" href="style.css">
   <script>(function(d){d.classList.replace('no-js','js');try{if(sessionStorage.getItem('av-seen'))d.classList.add('seen')}catch(e){}})(document.documentElement);</script>
+  <!-- Google Analytics: put the Measurement ID (G-…) in GA_ID. Only runs on the live github.io site, so local previews aren't counted. -->
+  <script>
+  (function () {
+    var GA_ID = 'G-F9PN6DELYG';
+    if (!/^G-[A-Z0-9]+$/.test(GA_ID) || location.hostname !== 'abhinaysingh314-cmd.github.io') return;
+    var s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+  })();
+  </script>
 
   <script type="application/ld+json">
   {
