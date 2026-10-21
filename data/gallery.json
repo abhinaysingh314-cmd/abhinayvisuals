@@ -1,0 +1,123 @@
+{
+  "projects": [
+    {
+      "title": "Election Commission",
+      "type": "Documentary",
+      "cat": "documentary",
+      "ratio": "9:16",
+      "category": "News explainer",
+      "year": "2026",
+      "thumb": "assets/img/work/documentary-election.jpg",
+      "video": "assets/video/work/documentary-election.mp4",
+      "preview": "assets/video/work/documentary-election-preview.mp4",
+      "desc": "A documentary-style news explainer on fake voter addresses, built from archival stills, data cards and newspaper call-outs."
+    },
+    {
+      "title": "Night Ride, Prayagraj",
+      "type": "Cinematic",
+      "cat": "cinematic",
+      "ratio": "16:9",
+      "category": "Short film",
+      "year": "2026",
+      "thumb": "assets/img/work/cinematic-night-ride.jpg",
+      "video": "assets/video/work/cinematic-night-ride.mp4",
+      "preview": "assets/video/work/cinematic-night-ride-preview.mp4",
+      "desc": "A 4K cinematic short shot at night in Prayagraj. Low-light grade, police-scanner captions and sound design that turns a motorbike ride into a chase."
+    },
+    {
+      "title": "Kerala Holiday Poster",
+      "type": "Design",
+      "cat": "design",
+      "ratio": "4:5",
+      "category": "Poster",
+      "year": "",
+      "thumb": "assets/img/work-04.png",
+      "video": "",
+      "preview": "",
+      "desc": "A holiday poster for Hodophiles Xplore Visas: a four-night Kerala package with backwater photos, the price and contact details."
+    },
+    {
+      "title": "Australia PR, Explained",
+      "type": "Reel",
+      "cat": "reel",
+      "ratio": "9:16",
+      "category": "Creator",
+      "year": "2026",
+      "thumb": "assets/img/work/reel-australia-pr.jpg",
+      "video": "assets/video/work/reel-australia-pr.mp4",
+      "preview": "assets/video/work/reel-australia-pr-preview.mp4",
+      "desc": "A personal-brand reel in Hinglish: word-by-word captions, cutaway B-roll and map graphics that keep an immigration topic easy to follow."
+    },
+    {
+      "title": "Under-14 Visa Interviews",
+      "type": "AI Video",
+      "cat": "ai",
+      "ratio": "9:16",
+      "category": "Immigration",
+      "year": "2026",
+      "thumb": "assets/img/work/ai-visa-interview.jpg",
+      "video": "assets/video/work/ai-visa-interview.mp4",
+      "preview": "assets/video/work/ai-visa-interview-preview.mp4",
+      "desc": "An AI-generated explainer for Hodophiles Xplore Visas on a new US interview rule for children, built from illustrated characters, checklists and animated warning cards."
+    },
+    {
+      "title": "Your Migration Pathway",
+      "type": "AI Video",
+      "cat": "ai",
+      "ratio": "9:16",
+      "category": "Immigration",
+      "year": "2026",
+      "thumb": "assets/img/work/ai-migration-services.jpg",
+      "video": "assets/video/work/ai-migration-services.mp4",
+      "preview": "assets/video/work/ai-migration-services-preview.mp4",
+      "desc": "An AI-generated promo for a visa consultancy: photoreal scenes of a future abroad, ending on a clean services card and the brand."
+    },
+    {
+      "title": "382 CRS for Canada PR?",
+      "type": "AI Video",
+      "cat": "ai",
+      "ratio": "9:16",
+      "category": "Immigration news",
+      "year": "2026",
+      "thumb": "assets/img/work/ai-canada-crs.jpg",
+      "video": "assets/video/work/ai-canada-crs.mp4",
+      "preview": "assets/video/work/ai-canada-crs-preview.mp4",
+      "desc": "A fast news hit on a record-low Express Entry draw, with a burst background, big numbers and a reaction shot made with AI."
+    },
+    {
+      "title": "Don’t Wait",
+      "type": "AI Video",
+      "cat": "ai",
+      "ratio": "9:16",
+      "category": "Immigration ad",
+      "year": "2026",
+      "thumb": "assets/img/work/ai-eligibility.jpg",
+      "video": "assets/video/work/ai-eligibility.mp4",
+      "preview": "assets/video/work/ai-eligibility-preview.mp4",
+      "desc": "A story-driven AI ad about putting off a visa eligibility check, from doubt to a booked consultation in under thirty seconds."
+    }
+  ],
+  "beforeAfter": [
+    {
+      "title": "Green screen to documentary set",
+      "label": "Podcast",
+      "ratio": "16:9",
+      "video": "assets/video/work/podcast-before-after.mp4",
+      "thumb": "assets/img/work/podcast-before-after.jpg"
+    },
+    {
+      "title": "Talking head, re-staged",
+      "label": "Reel",
+      "ratio": "9:16",
+      "video": "assets/video/work/sample-before-after-1.mp4",
+      "thumb": "assets/img/work/sample-before-after-1.jpg"
+    },
+    {
+      "title": "Brand explainer, cleaned up",
+      "label": "Reel",
+      "ratio": "9:16",
+      "video": "assets/video/work/sample-before-after-2.mp4",
+      "thumb": "assets/img/work/sample-before-after-2.jpg"
+    }
+  ]
+}

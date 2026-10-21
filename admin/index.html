@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Gallery admin · Abhinay Visuals</title>
+<style>
+  :root {
+    --bg: #f5f5f7; --panel: #fff; --ink: #1d1d1f; --muted: #6e6e73; --line: #d2d2d7;
+    --rec: #E82707; --rec-hover: #c92106; --ok: #1a7f37; --radius: 14px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--rec); }
+  [hidden] { display: none !important; }
+
+  .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: rgba(255,255,255,.86); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line); }
+  .top h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  .top h1 span { color: var(--muted); font-weight: 400; }
+  .top .grow { flex: 1; }
+  .status { font-size: 13px; color: var(--muted); }
+  .status.is-dirty { color: var(--rec); }
+
+  .btn { border: 1px solid var(--line); background: var(--panel); border-radius: 980px; padding: 7px 16px; cursor: pointer; white-space: nowrap; text-decoration: none; color: var(--ink); font-size: 14px; }
+  .btn:hover { border-color: var(--ink); }
+  .btn--primary { background: var(--rec); border-color: var(--rec); color: #fff; font-weight: 600; }
+  .btn--primary:hover { background: var(--rec-hover); border-color: var(--rec-hover); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn--small { padding: 4px 12px; font-size: 13px; }
+  .btn--danger { color: var(--rec); }
+  .icon-btn { border: 1px solid var(--line); background: var(--panel); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: inline-grid; place-items: center; }
+  .icon-btn:disabled { opacity: .3; cursor: default; }
+
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  .login { max-width: 520px; margin: 48px auto; background: var(--panel); border-radius: 18px; padding: 28px; }
+  .login h2 { margin: 0 0 6px; font-size: 24px; }
+  .login ol { padding-left: 20px; color: var(--muted); }
+  .login li { margin: 4px 0; }
+  .field { display: grid; gap: 4px; margin: 0 0 12px; }
+  .field > span { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  input[type=text], input[type=password], select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: #fff; }
+  textarea { min-height: 72px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--rec); outline-offset: -1px; border-color: transparent; }
+  .check { display: flex; align-items: center; gap: 8px; margin: 4px 0 16px; color: var(--muted); font-size: 14px; }
+  .err { color: var(--rec); font-size: 14px; margin: 8px 0 0; }
+  details.repo { margin-top: 16px; font-size: 14px; color: var(--muted); }
+  details.repo .row3 { display: grid; grid-template-columns: 1fr 1fr 90px; gap: 8px; margin-top: 8px; }
+
+  .tabs { display: flex; gap: 6px; margin: 0 0 20px; flex-wrap: wrap; }
+  .tab { border: 0; background: transparent; padding: 8px 16px; border-radius: 980px; cursor: pointer; color: var(--muted); font-weight: 500; }
+  .tab[aria-selected=true] { background: var(--ink); color: #fff; }
+  .tab .n { opacity: .6; margin-left: 4px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; }
+  .section-head p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .list { display: grid; gap: 12px; }
+  .item { background: var(--panel); border-radius: var(--radius); padding: 14px; display: grid; grid-template-columns: 120px 1fr auto; gap: 16px; align-items: start; }
+  .item.is-new { outline: 2px solid var(--rec); }
+  .thumb { width: 120px; aspect-ratio: 4 / 5; border-radius: 10px; background: #e8e8ed center / cover no-repeat; display: grid; place-items: center; color: var(--muted); font-size: 12px; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 12px; }
+  .files { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
+  .file { border: 1px dashed var(--line); border-radius: 10px; padding: 9px 10px; font-size: 13px; display: grid; gap: 4px; min-width: 0; }
+  .file b { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .file .cur { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file .cur.is-new { color: var(--ok); }
+  .file label { cursor: pointer; color: var(--rec); font-weight: 500; }
+  .file input { display: none; }
+  .file .clear { border: 0; background: none; padding: 0; color: var(--muted); cursor: pointer; text-align: left; font-size: 12px; }
+  .side { display: grid; gap: 6px; justify-items: center; }
+
+  .empty { background: var(--panel); border-radius: var(--radius); padding: 32px; text-align: center; color: var(--muted); }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 14px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,.2); z-index: 10; }
+  .toast.is-error { background: var(--rec); }
+  .overlay { position: fixed; inset: 0; background: rgba(245,245,247,.8); backdrop-filter: blur(6px); display: grid; place-items: center; z-index: 20; }
+  .overlay div { background: var(--panel); padding: 22px 26px; border-radius: 16px; min-width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,.12); }
+  .bar { height: 6px; background: #e8e8ed; border-radius: 6px; overflow: hidden; margin-top: 12px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--rec); transition: width .3s; }
+
+  @media (max-width: 760px) {
+    .top { flex-wrap: wrap; padding: 10px 16px; }
+    .top .status { order: 5; width: 100%; }
+    main { padding: 16px 16px 80px; }
+    .item { grid-template-columns: 80px 1fr; }
+    .thumb { width: 80px; }
+    .side { grid-column: 1 / -1; grid-auto-flow: column; justify-content: end; }
+    .grid2, .grid3, .files { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Abhinay Visuals <span>· Gallery admin</span></h1>
+  <span class="grow"></span>
+  <span class="status" id="status"></span>
+  <a class="btn" href="../" target="_blank" rel="noopener">View site</a>
+  <button class="btn" id="logout" hidden>Log out</button>
+  <button class="btn btn--primary" id="save" hidden disabled>Save &amp; publish</button>
+</header>
+
+<main>
+  <!-- connect: a GitHub token with write access to the site's repository -->
+  <section class="login" id="login">
+    <h2>Connect to GitHub</h2>
+    <p>Your gallery lives in the website's GitHub repository. The admin page saves your changes there, and the site updates by itself about a minute later.</p>
+    <ol>
+      <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create a fine-grained token</a> on GitHub.</li>
+      <li>Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick <b>abhinayvisuals</b>.</li>
+      <li>Under <b>Permissions → Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
+      <li>Generate it, copy it and paste it below.</li>
+    </ol>
+    <form id="loginForm">
+      <label class="field"><span>GitHub token</span><input type="password" id="token" autocomplete="off" placeholder="github_pat_…" required></label>
+      <label class="check"><input type="checkbox" id="remember" checked> Remember on this device</label>
+      <button class="btn btn--primary" type="submit">Connect</button>
+      <p class="err" id="loginErr" hidden></p>
+      <details class="repo">
+        <summary>Repository</summary>
+        <div class="row3">
+          <label class="field"><span>Owner</span><input type="text" id="owner"></label>
+          <label class="field"><span>Repository</span><input type="text" id="repo"></label>
+          <label class="field"><span>Branch</span><input type="text" id="branch"></label>
+        </div>
+      </details>
+    </form>
+  </section>
+
+  <section id="editor" hidden>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="work" aria-selected="true">Selected work<span class="n"></span></button>
+      <button class="tab" role="tab" data-tab="ai" aria-selected="false">AI videos<span class="n"></span></button>
+      <button class="tab" role="tab" data-tab="ba" aria-selected="false">Before / After<span class="n"></span></button>
+    </nav>
+    <div class="section-head">
+      <p id="hint"></p>
+      <button class="btn" id="add">+ Add</button>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+</main>
+
+<div class="overlay" id="busy" hidden><div><strong id="busyText">Saving…</strong><div class="bar"><i id="busyBar"></i></div></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const DEFAULT_REPO = { owner: 'abhinaysingh314-cmd', repo: 'abhinayvisuals', branch: 'main' };
+  const DATA_PATH = 'data/gallery.json';
+  const UPLOAD_DIR = 'assets/uploads';
+  const MAX_MB = 95, WARN_MB = 40; // GitHub refuses files over 100 MB
+  const CATS = { documentary: 'Documentary', cinematic: 'Cinematic', reel: 'Reel', design: 'Design' };
+  const RATIOS = ['9:16', '16:9', '4:5', '1:1'];
+  const TABS = {
+    work: { hint: 'Shown in the Selected work grid, in this order. Use the arrows to reorder.', add: 'Add project' },
+    ai: { hint: 'Shown in the AI Video menu panel.', add: 'Add AI video' },
+    ba: { hint: 'Shown in the Before and after section. 16:9 videos take a full row.', add: 'Add before/after' },
+  };
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k) || sessionStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v, keep) { try { (keep ? localStorage : sessionStorage).setItem(k, v); } catch (e) { /* storage blocked */ } },
+    del(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) { /* storage blocked */ } },
+  };
+
+  // state: three lists of items; each item may carry pending files in item._files
+  let cfg = { ...DEFAULT_REPO, ...JSON.parse(store.get('av-admin-repo') || '{}') };
+  let token = store.get('av-admin-token') || '';
+  let lists = { work: [], ai: [], ba: [] };
+  let extra = {}; // any other keys in gallery.json, kept as they are
+  let tab = 'work', dirty = false;
+  const preview = new Map(); // repo path -> object URL for files uploaded this session
+
+  /* ---------- GitHub API ---------- */
+  async function gh(path, opts = {}) {
+    const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}${path}`, {
+      ...opts,
+      headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28', ...(opts.body ? { 'Content-Type': 'application/json' } : {}) },
+    });
+    if (!res.ok) {
+      let msg = ''; try { msg = (await res.json()).message; } catch (e) { /* no body */ }
+      const why = res.status === 401 ? 'The token is wrong or has expired.'
+        : res.status === 403 || res.status === 404 ? 'The token can’t reach this repository. Check it has Contents: Read and write for abhinayvisuals.'
+        : res.status === 413 || res.status === 422 ? 'GitHub refused a file. It may be too large (over 100 MB).'
+        : '';
+      throw new Error([why, msg && `(GitHub: ${msg})`].filter(Boolean).join(' ') || `GitHub error ${res.status}`);
+    }
+    return res.status === 204 ? null : res.json();
+  }
+  const b64ToText = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, '')), c => c.charCodeAt(0)));
+  const fileToB64 = file => new Promise((ok, fail) => {
+    const r = new FileReader();
+    r.onload = () => ok(String(r.result).split(',')[1]);
+    r.onerror = () => fail(new Error(`Couldn’t read ${file.name}`));
+    r.readAsDataURL(file);
+  });
+
+  async function load() {
+    const f = await gh(`/contents/${DATA_PATH}?ref=${encodeURIComponent(cfg.branch)}`);
+    const data = JSON.parse(b64ToText(f.content));
+    const { projects = [], beforeAfter = [], ...rest } = data;
+    extra = rest;
+    lists = { work: projects.filter(p => p.cat !== 'ai'), ai: projects.filter(p => p.cat === 'ai'), ba: beforeAfter };
+    setDirty(false);
+  }
+
+  /* ---------- save: one commit with the new files and the updated gallery.json ---------- */
+  const slug = s => String(s || 'item').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'item';
+  const extOf = (file, fallback) => ((file.name || '').match(/\.([a-z0-9]+)$/i) || [, fallback])[1].toLowerCase();
+
+  async function save() {
+    const all = [...lists.work, ...lists.ai, ...lists.ba];
+    for (const it of all) {
+      if (!it.title.trim()) { switchTab(lists.ba.includes(it) ? 'ba' : lists.ai.includes(it) ? 'ai' : 'work'); throw new Error('Every item needs a title.'); }
+      if (!it.thumb && !(it._files && it._files.thumb)) { switchTab(lists.ba.includes(it) ? 'ba' : lists.ai.includes(it) ? 'ai' : 'work'); throw new Error(`“${it.title}” needs a thumbnail image.`); }
+      if (lists.ba.includes(it) && !it.video && !(it._files && it._files.video)) { switchTab('ba'); throw new Error(`“${it.title}” needs a video.`); }
+    }
+    const uploads = [];
+    all.forEach(it => Object.entries(it._files || {}).forEach(([key, file]) => uploads.push({ it, key, file })));
+    const steps = uploads.length + 3; let done = 0;
+    const tick = text => { done++; busy(text, done / steps); };
+
+    busy('Preparing…', 0);
+    const ref = await gh(`/git/ref/heads/${encodeURIComponent(cfg.branch)}`);
+    const head = ref.object.sha;
+    const baseTree = (await gh(`/git/commits/${head}`)).tree.sha;
+    tick('Uploading files…');
+
+    const tree = [];
+    const stamp = Date.now().toString(36);
+    for (const u of uploads) {
+      busy(`Uploading ${u.file.name || u.key} (${(u.file.size / 1048576).toFixed(1)} MB)…`, done / steps);
+      const blob = await gh('/git/blobs', { method: 'POST', body: JSON.stringify({ content: await fileToB64(u.file), encoding: 'base64' }) });
+      const suffix = u.key === 'preview' ? '-preview' : u.key === 'thumb' ? '-thumb' : '';
+      const path = `${UPLOAD_DIR}/${slug(u.it.title)}-${stamp}${suffix}.${extOf(u.file, u.key === 'thumb' ? 'jpg' : 'mp4')}`;
+      tree.push({ path, mode: '100644', type: 'blob', sha: blob.sha });
+      u.path = path;
+      tick('Uploading files…');
+    }
+
+    const clean = it => {
+      const out = {};
+      Object.keys(it).forEach(k => { if (k[0] !== '_') out[k] = it[k]; });
+      return out;
+    };
+    // paths are only written into the data once every upload has gone through
+    const pathFor = new Map(uploads.map(u => [u.it, {}]));
+    uploads.forEach(u => { pathFor.get(u.it)[u.key] = u.path; });
+    const withPaths = it => ({ ...clean(it), ...(pathFor.get(it) || {}) });
+    const data = { ...extra, projects: [...lists.work, ...lists.ai].map(withPaths), beforeAfter: lists.ba.map(withPaths) };
+    tree.push({ path: DATA_PATH, mode: '100644', type: 'blob', content: JSON.stringify(data, null, 2) + '\n' });
+
+    busy('Publishing…', done / steps);
+    const newTree = await gh('/git/trees', { method: 'POST', body: JSON.stringify({ base_tree: baseTree, tree }) });
+    const commit = await gh('/git/commits', { method: 'POST', body: JSON.stringify({ message: 'Update gallery from admin', tree: newTree.sha, parents: [head] }) });
+    await gh(`/git/refs/heads/${encodeURIComponent(cfg.branch)}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) });
+    tick('Done');
+
+    // the new files aren't on the live site until it rebuilds; keep showing the local copies
+    uploads.forEach(u => {
+      const url = u.it._urls && u.it._urls[u.key];
+      if (url) preview.set(u.path, url);
+      u.it[u.key] = u.path;
+    });
+    all.forEach(it => { delete it._files; delete it._urls; delete it._new; });
+    setDirty(false);
+  }
+
+  /* ---------- UI ---------- */
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const src = (it, key) => (it._urls && it._urls[key]) || preview.get(it[key]) || (it[key] ? `../${it[key]}` : '');
+  const fileName = p => (p || '').split('/').pop();
+
+  function toast(msg, isError) {
+    const t = $('#toast');
+    t.textContent = msg; t.classList.toggle('is-error', !!isError); t.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, isError ? 9000 : 5000);
+  }
+  function busy(text, frac) {
+    $('#busy').hidden = text == null;
+    if (text != null) { $('#busyText').textContent = text; $('#busyBar').style.width = `${Math.round((frac || 0) * 100)}%`; }
+  }
+  function setDirty(on) {
+    dirty = on;
+    $('#save').disabled = !on;
+    $('#status').textContent = on ? 'Unsaved changes' : 'All changes saved';
+    $('#status').classList.toggle('is-dirty', on);
+    document.querySelectorAll('.tab').forEach(t => { t.querySelector('.n').textContent = lists[t.dataset.tab].length; });
+  }
+
+  function fileBox(it, key, label, accept) {
+    const pending = it._files && it._files[key];
+    const cur = pending ? `New: ${pending.name || 'auto poster'}` : (it[key] ? fileName(it[key]) : 'None');
+    return `<div class="file">
+      <b>${label}</b>
+      <span class="cur${pending ? ' is-new' : ''}" title="${esc(cur)}">${esc(cur)}</span>
+      <label>${it[key] || pending ? 'Replace' : 'Choose'} file<input type="file" accept="${accept}" data-file="${key}"></label>
+      ${(it[key] || pending) && key !== 'thumb' ? `<button class="clear" type="button" data-clear="${key}">Remove</button>` : ''}
+    </div>`;
+  }
+
+  function itemHTML(it, i, n) {
+    const isBA = tab === 'ba', isAI = tab === 'ai';
+    const thumb = src(it, 'thumb');
+    const ratioOpts = RATIOS.map(r => `<option${r === it.ratio ? ' selected' : ''}>${r}</option>`).join('');
+    return `<article class="item${it._new ? ' is-new' : ''}" data-i="${i}">
+      <div class="thumb">${thumb ? `<img src="${esc(thumb)}" alt="">` : 'No image'}</div>
+      <div>
+        <label class="field"><span>Title</span><input type="text" data-k="title" value="${esc(it.title)}" placeholder="Project title"></label>
+        ${isBA ? `
+        <div class="grid2">
+          <label class="field"><span>Label</span><input type="text" data-k="label" value="${esc(it.label)}" placeholder="Podcast, Reel…"></label>
+          <label class="field"><span>Format</span><select data-k="ratio">${ratioOpts}</select></label>
+        </div>
+        <div class="files">${fileBox(it, 'video', 'Video', 'video/mp4,video/webm,video/quicktime')}${fileBox(it, 'thumb', 'Poster image', 'image/*')}</div>` : `
+        <div class="grid3">
+          ${isAI ? '' : `<label class="field"><span>Filter</span><select data-k="cat">${Object.entries(CATS).map(([v, l]) => `<option value="${v}"${v === it.cat ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`}
+          <label class="field"><span>Format</span><select data-k="ratio">${ratioOpts}</select></label>
+          <label class="field"><span>Client / type</span><input type="text" data-k="category" value="${esc(it.category)}" placeholder="News explainer"></label>
+          <label class="field"><span>Year</span><input type="text" data-k="year" value="${esc(it.year)}" placeholder="2026" inputmode="numeric"></label>
+        </div>
+        <label class="field"><span>Description</span><textarea data-k="desc" placeholder="One or two lines about the project">${esc(it.desc)}</textarea></label>
+        <div class="files">${fileBox(it, 'video', 'Full video', 'video/mp4,video/webm,video/quicktime')}${fileBox(it, 'thumb', 'Thumbnail', 'image/*')}${isAI ? '' : fileBox(it, 'preview', 'Hover preview (optional)', 'video/mp4,video/webm')}</div>`}
+      </div>
+      <div class="side">
+        <button class="icon-btn" data-move="-1" title="Move up" aria-label="Move up"${i === 0 ? ' disabled' : ''}>↑</button>
+        <button class="icon-btn" data-move="1" title="Move down" aria-label="Move down"${i === n - 1 ? ' disabled' : ''}>↓</button>
+        <button class="btn btn--small btn--danger" data-del>Delete</button>
+      </div>
+    </article>`;
+  }
+
+  function render() {
+    const list = lists[tab];
+    $('#hint').textContent = TABS[tab].hint;
+    $('#add').textContent = `+ ${TABS[tab].add}`;
+    $('#list').innerHTML = list.length ? list.map((it, i) => itemHTML(it, i, list.length)).join('') : '<div class="empty">Nothing here yet.</div>';
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
+  }
+  function switchTab(t) { tab = t; render(); }
+
+  // a poster frame from a video file, so a thumbnail is never missing
+  function posterFrom(file) {
+    return new Promise(ok => {
+      const v = document.createElement('video');
+      v.muted = true; v.playsInline = true; v.preload = 'auto';
+      v.src = URL.createObjectURL(file);
+      const fail = () => ok(null);
+      v.onerror = fail;
+      v.onloadedmetadata = () => { v.currentTime = Math.min(1, (v.duration || 2) / 3); };
+      v.onseeked = () => {
+        const c = document.createElement('canvas');
+        const scale = Math.min(1, 1080 / Math.max(v.videoWidth, v.videoHeight));
+        c.width = Math.round(v.videoWidth * scale); c.height = Math.round(v.videoHeight * scale);
+        c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+        c.toBlob(b => ok(b && { blob: b, w: v.videoWidth, h: v.videoHeight }), 'image/jpeg', .85);
+      };
+      setTimeout(fail, 15000);
+    });
+  }
+  const ratioNum = r => { const [a, b] = r.split(':').map(Number); return a / b; };
+  const closestRatio = (w, h) => RATIOS.reduce((best, r) => (Math.abs(ratioNum(r) - w / h) < Math.abs(ratioNum(best) - w / h) ? r : best));
+
+  async function pickFile(it, key, file) {
+    const mb = file.size / 1048576;
+    if (mb > MAX_MB) { toast(`${file.name} is ${mb.toFixed(0)} MB. GitHub only takes files under 100 MB, so export a smaller version first.`, true); return; }
+    if (mb > WARN_MB) toast(`${file.name} is ${mb.toFixed(0)} MB. It will work, but a smaller export (under ${WARN_MB} MB) loads faster for visitors.`);
+    it._files = it._files || {}; it._urls = it._urls || {};
+    it._files[key] = file;
+    it._urls[key] = URL.createObjectURL(file);
+    if (key === 'video') {
+      const shot = await posterFrom(file);
+      if (shot) {
+        it.ratio = closestRatio(shot.w, shot.h);
+        if (!it.thumb && !it._files.thumb) {
+          const f = new File([shot.blob], 'poster.jpg', { type: 'image/jpeg' });
+          it._files.thumb = f; it._urls.thumb = URL.createObjectURL(f);
+        }
+      }
+    }
+    setDirty(true); render();
+  }
+
+  /* ---------- events ---------- */
+  const itemOf = el => { const a = el.closest('.item'); return a && lists[tab][+a.dataset.i]; };
+  $('#list').addEventListener('input', e => {
+    const k = e.target.dataset.k, it = itemOf(e.target); if (!k || !it) return;
+    it[k] = e.target.value;
+    if (k === 'cat') it.type = CATS[it.cat];
+    setDirty(true);
+  });
+  $('#list').addEventListener('change', e => {
+    const key = e.target.dataset.file, it = itemOf(e.target);
+    if (key && it && e.target.files[0]) pickFile(it, key, e.target.files[0]);
+  });
+  $('#list').addEventListener('click', e => {
+    const it = itemOf(e.target); if (!it) return;
+    const list = lists[tab], i = list.indexOf(it);
+    const mv = e.target.closest('[data-move]'), del = e.target.closest('[data-del]'), clr = e.target.closest('[data-clear]');
+    if (mv) { const j = i + +mv.dataset.move; [list[i], list[j]] = [list[j], list[i]]; }
+    else if (del) { if (!confirm(`Delete “${it.title || 'this item'}” from the site?`)) return; list.splice(i, 1); }
+    else if (clr) { const k = clr.dataset.clear; it[k] = ''; if (it._files) delete it._files[k]; if (it._urls) delete it._urls[k]; }
+    else return;
+    setDirty(true); render();
+  });
+  $('#add').addEventListener('click', () => {
+    const it = tab === 'ba' ? { title: '', label: 'Reel', ratio: '9:16', video: '', thumb: '' }
+      : { title: '', type: tab === 'ai' ? 'AI Video' : 'Reel', cat: tab === 'ai' ? 'ai' : 'reel', ratio: '9:16', category: '', year: String(new Date().getFullYear()), thumb: '', video: '', preview: '', desc: '' };
+    it._new = true;
+    lists[tab].unshift(it);
+    setDirty(true); render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const first = document.querySelector('.item [data-k=title]'); first && first.focus();
+  });
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+  $('#save').addEventListener('click', async () => {
+    $('#save').disabled = true;
+    try {
+      await save();
+      busy(null); render();
+      toast('Saved. Your site will show the changes in about a minute.');
+    } catch (err) {
+      busy(null); $('#save').disabled = !dirty;
+      toast(err.message, true);
+    }
+  });
+  addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  async function connect() {
+    try {
+      busy('Loading gallery…', .3);
+      await load();
+      busy(null);
+      $('#login').hidden = true; $('#editor').hidden = false; $('#save').hidden = false; $('#logout').hidden = false;
+      render(); setDirty(false);
+      return true;
+    } catch (err) {
+      busy(null);
+      return err;
+    }
+  }
+
+  $('#owner').value = cfg.owner; $('#repo').value = cfg.repo; $('#branch').value = cfg.branch;
+  $('#loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    token = $('#token').value.trim();
+    cfg = { owner: $('#owner').value.trim(), repo: $('#repo').value.trim(), branch: $('#branch').value.trim() || 'main' };
+    const res = await connect();
+    if (res === true) {
+      const keep = $('#remember').checked;
+      store.set('av-admin-token', token, keep);
+      store.set('av-admin-repo', JSON.stringify(cfg), keep);
+      $('#token').value = '';
+    } else {
+      $('#loginErr').textContent = res.message; $('#loginErr').hidden = false;
+    }
+  });
+  $('#logout').addEventListener('click', () => {
+    if (dirty && !confirm('You have unsaved changes. Log out anyway?')) return;
+    store.del('av-admin-token'); token = ''; dirty = false;
+    location.reload();
+  });
+
+  if (token) connect().then(res => { if (res !== true) { $('#loginErr').textContent = res.message; $('#loginErr').hidden = false; } });
+})();
+</script>
+</body>
+</html>

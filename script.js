@@ -5,11 +5,13 @@
 (() => {
   'use strict';
 
-  /* ---------- PROJECTS: single source of truth for the work grid ----------
-     Each project has a poster (`thumb`), the full clip for the lightbox (`video`)
-     and a short muted hover loop (`preview`). Re-encode new work with the same names. */
+  /* ---------- GALLERY: work grid, AI videos and before/after ----------
+     The live lists come from data/gallery.json, which the admin page (/admin) edits.
+     The lists below are only the fallback for when that file can't be fetched
+     (e.g. the page opened straight from disk). Each project has a poster (`thumb`),
+     the full clip for the lightbox (`video`) and an optional muted hover loop (`preview`). */
   const W = n => ({ thumb: `assets/img/work/${n}.jpg`, video: `assets/video/work/${n}.mp4`, preview: `assets/video/work/${n}-preview.mp4` });
-  const PROJECTS = [
+  let PROJECTS = [
     { title: 'Election Commission', type: 'Documentary', cat: 'documentary', ratio: '9:16', category: 'News explainer', year: '2026', ...W('documentary-election'),
       desc: 'A documentary-style news explainer on fake voter addresses, built from archival stills, data cards and newspaper call-outs.' },
     { title: 'Night Ride, Prayagraj', type: 'Cinematic', cat: 'cinematic', ratio: '16:9', category: 'Short film', year: '2026', ...W('cinematic-night-ride'),
@@ -27,6 +29,20 @@
     { title: 'Don’t Wait', type: 'AI Video', cat: 'ai', ratio: '9:16', category: 'Immigration ad', year: '2026', ...W('ai-eligibility'),
       desc: 'A story-driven AI ad about putting off a visa eligibility check, from doubt to a booked consultation in under thirty seconds.' },
   ];
+  const BA = n => ({ video: `assets/video/work/${n}.mp4`, thumb: `assets/img/work/${n}.jpg` });
+  let BEFORE_AFTER = [
+    { title: 'Green screen to documentary set', label: 'Podcast', ratio: '16:9', ...BA('podcast-before-after') },
+    { title: 'Talking head, re-staged', label: 'Reel', ratio: '9:16', ...BA('sample-before-after-1') },
+    { title: 'Brand explainer, cleaned up', label: 'Reel', ratio: '9:16', ...BA('sample-before-after-2') },
+  ];
+  // window.__GALLERY is set by the single-file export, which can't fetch
+  const loadGallery = () => (window.__GALLERY ? Promise.resolve(window.__GALLERY)
+    : fetch('data/gallery.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : Promise.reject(r.status))))
+    .then(g => {
+      if (Array.isArray(g.projects)) PROJECTS = g.projects;
+      if (Array.isArray(g.beforeAfter)) BEFORE_AFTER = g.beforeAfter;
+    })
+    .catch(() => { /* keep the fallback lists */ });
 
   /* ---------- helpers ---------- */
   const $ = (s, c = document) => c.querySelector(s);
@@ -38,7 +54,9 @@
   const isPhone = () => innerWidth <= 640;
   const hasGSAP = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
   const hasLenis = typeof window.Lenis !== 'undefined';
-  const ratioCSS = r => r.replace(':', ' / ');
+  const ratioCSS = r => (r || '16:9').replace(':', ' / ');
+  // gallery text is typed in the admin page, so escape it before it goes into markup
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const pad = (n, l = 2) => String(Math.floor(n)).padStart(l, '0');
   const store = {
     get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
@@ -112,14 +130,14 @@
 
   function renderWork() {
     grid.innerHTML = PROJECTS.map((p, i) => p.cat === 'ai' ? '' : `
-      <a class="card" href="#work" data-i="${i}" data-cat="${p.cat}" data-cursor="play" aria-label="Open project: ${p.title}">
-        <div class="card__media frame" style="aspect-ratio:${ratioCSS(p.ratio)}">
-          <img src="${p.thumb}" alt="" loading="lazy" decoding="async">
-          ${p.preview ? `<video muted loop playsinline preload="none" data-src="${p.preview}"></video>` : ''}
-          <span class="card__chip mono">${p.type} · ${p.ratio}</span>
+      <a class="card" href="#work" data-i="${i}" data-cat="${esc(p.cat)}" data-cursor="play" aria-label="Open project: ${esc(p.title)}">
+        <div class="card__media frame" style="aspect-ratio:${esc(ratioCSS(p.ratio))}">
+          <img src="${esc(p.thumb)}" alt="" loading="lazy" decoding="async">
+          ${p.preview ? `<video muted loop playsinline preload="none" data-src="${esc(p.preview)}"></video>` : ''}
+          <span class="card__chip mono">${esc(p.type)} · ${esc(p.ratio)}</span>
         </div>
         <div class="card__info">
-          <h3 class="card__title">${p.title}</h3>
+          <h3 class="card__title">${esc(p.title)}</h3>
         </div>
       </a>`).join('');
 
@@ -169,6 +187,17 @@
     grid.style.height = Math.max(...heights) + 'px';
   }
 
+  // after a re-render: hide filters with no projects and re-apply the active one
+  function syncFilters() {
+    $$('.filter').forEach(b => {
+      const f = b.dataset.filter;
+      b.hidden = f !== 'all' && !PROJECTS.some(p => p.cat === f);
+      if (b.hidden && f === currentFilter) currentFilter = 'all';
+    });
+    $$('.filter').forEach(b => { const on = b.dataset.filter === currentFilter; b.classList.toggle('is-active', on); b.setAttribute('aria-pressed', on); });
+    $$('.card', grid).forEach(c => { c.hidden = !(currentFilter === 'all' || c.dataset.cat === currentFilter); });
+  }
+
   function filters() {
     $$('.filter').forEach(btn => btn.addEventListener('click', e => {
       currentFilter = btn.dataset.filter;
@@ -195,8 +224,8 @@
       index = (i + list.length) % list.length;
       const p = PROJECTS[list[index]];
       media.innerHTML = p.video
-        ? `<video src="${p.video}" controls autoplay playsinline poster="${p.thumb}"></video>`
-        : `<img src="${p.thumb}" alt="${p.title}">`;
+        ? `<video src="${esc(p.video)}" controls autoplay playsinline poster="${esc(p.thumb)}"></video>`
+        : `<img src="${esc(p.thumb)}" alt="${esc(p.title)}">`;
       $('.lightbox__meta', lb).textContent = [p.type, p.ratio, p.category, p.year].filter(Boolean).join(' · ');
       $('.lightbox__title', lb).textContent = p.title;
       $('.lightbox__desc', lb).textContent = p.desc;
@@ -284,6 +313,20 @@
     }));
   }
 
+  /* ---------- BEFORE / AFTER: one figure per BEFORE_AFTER entry (16:9 ones span the row) ---------- */
+  function renderDemo() {
+    const box = $('.demo__grid'); if (!box) return;
+    box.innerHTML = BEFORE_AFTER.map(d => `
+      <figure class="demo__item${d.ratio === '16:9' ? ' demo__item--wide' : ''}">
+        <div class="demo__media frame" style="aspect-ratio:${esc(ratioCSS(d.ratio))}">
+          <video class="js-demo" src="${esc(d.video)}" poster="${esc(d.thumb)}" muted loop playsinline preload="none"></video>
+          <button class="demo__sound mono" aria-pressed="false"><span class="rec-dot"></span><span class="demo__sound-label">SOUND OFF</span></button>
+        </div>
+        <figcaption class="demo__cap"><span class="mono">${esc((d.label || '').toUpperCase())} · ${esc(d.ratio)}</span><strong>${esc(d.title)}</strong></figcaption>
+      </figure>`).join('');
+    $('#demo').hidden = !BEFORE_AFTER.length;
+  }
+
   /* ---------- BEFORE / AFTER players: muted autoplay in view, one sound at a time ---------- */
   function demoPlayers() {
     const items = $$('.demo__media');
@@ -326,14 +369,17 @@
   }
 
   /* ---------- Menu panels (About, AI videos): open on hover over their menu link, or on click/tap ---------- */
-  function navPanels() {
-    // the AI panel lists the AI projects from PROJECTS
-    const aiList = $('#ai-videos .ai-pop__grid');
-    if (aiList) aiList.innerHTML = PROJECTS.map((p, i) => p.cat !== 'ai' ? '' : `
-      <li><button class="ai-pop__item" type="button" data-open-project="${i}" data-group="ai" aria-label="Play ${p.title}">
-        <span class="ai-pop__thumb"><img src="${p.thumb}" alt="" loading="lazy"></span>
-        <span class="ai-pop__name">${p.title}</span>
+  // the AI panel lists the AI projects from PROJECTS
+  function renderAI() {
+    const aiList = $('#ai-videos .ai-pop__grid'); if (!aiList) return;
+    aiList.innerHTML = PROJECTS.map((p, i) => p.cat !== 'ai' ? '' : `
+      <li><button class="ai-pop__item" type="button" data-open-project="${i}" data-group="ai" aria-label="Play ${esc(p.title)}">
+        <span class="ai-pop__thumb"><img src="${esc(p.thumb)}" alt="" loading="lazy"></span>
+        <span class="ai-pop__name">${esc(p.title)}</span>
       </button></li>`).join('');
+  }
+
+  function navPanels() {
 
     const panels = [['#about', '.nav__link--about'], ['#ai-videos', '.nav__link--ai']]
       .map(([pop, trigger]) => ({ hash: pop, pop: $(pop), trigger: $(trigger), timer: 0 }))
@@ -424,15 +470,20 @@
   /* =========================================================
      BOOT — static modes bail out here
      ========================================================= */
-  renderWork();
   filters();
   lightbox();
   clock();
   copyEmail();
   mobileMenu();
-  demoPlayers();
   meters();
   navPanels();
+  loadGallery().then(() => {
+    renderWork();
+    renderAI();
+    renderDemo();
+    demoPlayers();
+    syncFilters();
+  });
 
   if (!hasGSAP || RM) {
     root.classList.add('rm');
